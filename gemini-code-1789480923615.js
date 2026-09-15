@@ -3,5 +3,5 @@
  */
 const CONFIG = {
   // GANTI SAMA URL WEB APP ANDA SESEORANG SETELAH DEPLOY GOOGLE APPS SCRIPT
-  API_URL: "https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec"
+  API_URL: "https://script.google.com/macros/s/AKfycbyC9IcJzn8ob3PqEltUHW-nvvFbQapiIxYVzfIzdLzXBH6EISZAHDSFe1loHrgPpuJrJg/exec"
 };
