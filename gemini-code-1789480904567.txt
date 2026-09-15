@@ -1,0 +1,11 @@
+aplikasi-administrasi-siswa/
+│
+├── index.html            # Halaman utama aplikasi
+├── css/
+│   └── style.css         # Styling modern, profesional & responsif
+├── js/
+│   ├── config.js        # Konfigurasi URL Google Apps Script
+│   └── app.js           # Logika Frontend & Operasi CRUD
+├── backend/
+│   └── Code.gs           # Source code Google Apps Script (Backend)
+└── README.md             # Panduan dan dokumentasi proyek

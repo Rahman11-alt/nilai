@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplikasi Administrasi Siswa</title>
+  
+  <!-- Font Family & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Style App -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- SheetJS Library (Excel Import/Export) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <i class="fa-solid fa-graduation-cap brand-icon"></i>
+        <div>
+          <h1>SimSiswa Pro</h1>
+          <p class="subtitle">Sistem Administrasi Data Siswa Permanen</p>
+        </div>
+      </div>
+      <div class="status-badge" id="statusBadge">
+        <span class="status-dot"></span>
+        <span id="statusText">Terhubung ke Sheets</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+
+    <!-- Dashboard Statistics -->
+    <section class="dashboard-grid">
+      <div class="stat-card primary">
+        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+        <div class="stat-info">
+          <h3>Total Siswa</h3>
+          <p class="stat-value" id="statTotal">0</p>
+        </div>
+      </div>
+      <div class="stat-card info">
+        <div class="stat-icon"><i class="fa-solid fa-mars"></i></div>
+        <div class="stat-info">
+          <h3>Laki-Laki</h3>
+          <p class="stat-value" id="statMale">0</p>
+        </div>
+      </div>
+      <div class="stat-card danger">
+        <div class="stat-icon"><i class="fa-solid fa-venus"></i></div>
+        <div class="stat-info">
+          <h3>Perempuan</h3>
+          <p class="stat-value" id="statFemale">0</p>
+        </div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+        <div class="stat-info">
+          <h3>Jumlah Kelas</h3>
+          <p class="stat-value" id="statClasses">0</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Box -->
+    <section class="card-box">
+      <!-- Toolbar Filter & Search -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="searchInput" placeholder="Cari nama, NISN, NIS, atau ortu...">
+          </div>
+          <div class="filter-box">
+            <select id="filterKelas">
+              <option value="">Semua Kelas</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="toolbar-right">
+          <button class="btn btn-secondary" id="btnDownloadTemplate" title="Download Template Excel">
+            <i class="fa-solid fa-file-arrow-down"></i> Template
+          </button>
+          <button class="btn btn-secondary" id="btnImport" title="Import Data dari Excel">
+            <i class="fa-solid fa-file-import"></i> Import
+          </button>
+          <button class="btn btn-secondary" id="btnExport" title="Export Data ke Excel">
+            <i class="fa-solid fa-file-excel"></i> Export
+          </button>
+          <button class="btn btn-primary" id="btnAddSiswa">
+            <i class="fa-solid fa-user-plus"></i> Tambah Siswa
+          </button>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">No</th>
+              <th>NISN / NIS</th>
+              <th>Nama Siswa</th>
+              <th>L/P</th>
+              <th>Kelas</th>
+              <th>Orang Tua</th>
+              <th>No. HP</th>
+              <th style="text-align: center; width: 140px;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody">
+            <tr>
+              <td colspan="8" class="text-center py-4">Memuat data siswa...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="table-footer">
+        <span id="recordInfo">Menampilkan 0 data</span>
+        <button class="btn btn-sm btn-secondary" id="btnRefresh">
+          <i class="fa-solid fa-rotate-right"></i> Refresh Data
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Form (Tambah / Edit) -->
+  <div class="modal" id="modalForm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalFormTitle">Tambah Data Siswa</h2>
+        <button class="btn-close" id="btnCloseModalForm">&times;</button>
+      </div>
+      <form id="studentForm">
+        <input type="hidden" id="siswaId">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="nisn">NISN</label>
+            <input type="text" id="nisn" placeholder="Contoh: 0051234567" required>
+          </div>
+          <div class="form-group">
+            <label for="nis">NIS</label>
+            <input type="text" id="nis" placeholder="Contoh: 212210001" required>
+          </div>
+          <div class="form-group full-width">
+            <label for="nama">Nama Lengkap Siswa</label>
+            <input type="text" id="nama" placeholder="Contoh: Ahmad Subagja" required>
+          </div>
+          <div class="form-group">
+            <label for="jenisKelamin">Jenis Kelamin</label>
+            <select id="jenisKelamin" required>
+              <option value="">-- Pilih --</option>
+              <option value="Laki-laki">Laki-laki</option>
+              <option value="Perempuan">Perempuan</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="kelas">Kelas</label>
+            <input type="text" id="kelas" placeholder="Contoh: X IPA 1" required>
+          </div>
+          <div class="form-group">
+            <label for="tempatLahir">Tempat Lahir</label>
+            <input type="text" id="tempatLahir" placeholder="Contoh: Bandung" required>
+          </div>
+          <div class="form-group">
+            <label for="tanggalLahir">Tanggal Lahir</label>
+            <input type="date" id="tanggalLahir" required>
+          </div>
+          <div class="form-group">
+            <label for="namaOrangTua">Nama Orang Tua / Wali</label>
+            <input type="text" id="namaOrangTua" placeholder="Contoh: Budi Santoso" required>
+          </div>
+          <div class="form-group">
+            <label for="noHp">No HP / WhatsApp</label>
+            <input type="tel" id="noHp" placeholder="Contoh: 081234567890" required>
+          </div>
+          <div class="form-group full-width">
+            <label for="alamat">Alamat Lengkap</label>
+            <textarea id="alamat" rows="2" placeholder="Contoh: Jl. Merdeka No. 45, Bandung" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelForm">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveForm">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan Data
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Detail Siswa -->
+  <div class="modal" id="modalDetail">
+    <div class="modal-content modal-md">
+      <div class="modal-header">
+        <h2>Detail Data Siswa</h2>
+        <button class="btn-close" id="btnCloseModalDetail">&times;</button>
+      </div>
+      <div class="detail-body" id="detailContent">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCloseDetailBtn">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Hapus Konfirmasi -->
+  <div class="modal" id="modalDelete">
+    <div class="modal-content modal-sm">
+      <div class="modal-header danger-header">
+        <h2>Konfirmasi Hapus</h2>
+        <button class="btn-close" id="btnCloseModalDelete">&times;</button>
+      </div>
+      <div class="modal-body text-center">
+        <i class="fa-solid fa-triangle-exclamation warning-icon"></i>
+        <p>Apakah Anda yakin ingin menghapus data siswa:</p>
+        <h3 id="deleteStudentName" class="highlight-delete-name">-</h3>
+        <p class="text-sm text-muted">Data yang dihapus dari Google Sheets tidak dapat dikembalikan.</p>
+      </div>
+      <div class="modal-footer justify-center">
+        <button class="btn btn-secondary" id="btnCancelDelete">Batal</button>
+        <button class="btn btn-danger" id="btnConfirmDelete">
+          <i class="fa-solid fa-trash"></i> Hapus Permanen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Import Excel -->
+  <div class="modal" id="modalImport">
+    <div class="modal-content modal-md">
+      <div class="modal-header">
+        <h2>Import Data Siswa dari Excel</h2>
+        <button class="btn-close" id="btnCloseModalImport">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="import-area" id="importDropZone">
+          <i class="fa-solid fa-file-excel excel-icon"></i>
+          <p>Pilih file Excel (.xlsx / .xls)</p>
+          <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden-input">
+          <button class="btn btn-secondary" onclick="document.getElementById('excelFileInput').click()">Pilih File</button>
+        </div>
+        <div id="importPreviewArea" class="import-preview-area hidden">
+          <p id="importFileName" class="font-semibold"></p>
+          <p id="importCountInfo" class="text-sm text-muted"></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelImport">Batal</button>
+        <button class="btn btn-primary" id="btnProcessImport" disabled>
+          <i class="fa-solid fa-upload"></i> Proses Import
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Loading Indicator -->
+  <div class="loading-overlay hidden" id="loadingOverlay">
+    <div class="spinner-box">
+      <div class="spinner"></div>
+      <p id="loadingText">Memproses data...</p>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
